@@ -1,14 +1,13 @@
 variable "repos" {
   description = "Map of repositories and their configs. Refer to https://www.runatlantis.io/docs/server-side-repo-config.html#example-server-side-repo"
   type = list(object({
-    id                              = optional(string, "/.*/")
-    branch                          = optional(string)
-    apply_requirements              = optional(list(string))
-    allowed_overrides               = optional(list(string))
-    allowed_workflows               = optional(list(string))
-    allow_all_server_side_workflows = optional(bool, false)
-    allow_custom_workflows          = optional(bool)
-    delete_source_branch_on_merge   = optional(bool)
+    id                            = optional(string, "/.*/")
+    branch                        = optional(string)
+    apply_requirements            = optional(list(string))
+    allowed_overrides             = optional(list(string))
+    allowed_workflows             = optional(list(string))
+    allow_custom_workflows        = optional(bool)
+    delete_source_branch_on_merge = optional(bool)
     pre_workflow_hooks = optional(list(object({
       run = string
     })))
@@ -16,6 +15,18 @@ variable "repos" {
       run = string
     })))
     workflow = optional(string)
+    ######### Helpers #########
+    allow_all_server_side_workflows = optional(bool, false)
+    terragrunt_atlantis_config = optional(object({
+      enabled              = optional(bool, false)
+      output               = optional(string, "atlantis.yaml")
+      automerge            = optional(bool)
+      autoplan             = optional(bool)
+      parallel             = optional(bool)
+      cascade_dependencies = optional(bool)
+      filter               = optional(string)
+      use_project_markers  = optional(bool)
+    }), {})
   }))
   default = []
 }
@@ -23,14 +34,13 @@ variable "repos" {
 variable "repos_common_config" {
   description = "Common config that will be merged into each item of the repos list"
   type = object({
-    id                              = optional(string)
-    branch                          = optional(string)
-    apply_requirements              = optional(list(string))
-    allowed_overrides               = optional(list(string))
-    allowed_workflows               = optional(list(string))
-    allow_all_server_side_workflows = optional(bool, false)
-    allow_custom_workflows          = optional(bool)
-    delete_source_branch_on_merge   = optional(bool)
+    id                            = optional(string)
+    branch                        = optional(string)
+    apply_requirements            = optional(list(string))
+    allowed_overrides             = optional(list(string))
+    allowed_workflows             = optional(list(string))
+    allow_custom_workflows        = optional(bool)
+    delete_source_branch_on_merge = optional(bool)
     pre_workflow_hooks = optional(list(object({
       run = string
     })))
@@ -38,6 +48,15 @@ variable "repos_common_config" {
       run = string
     })))
     workflow = optional(string)
+    ######### Helpers #########
+    allow_all_server_side_workflows = optional(bool, false)
+    terragrunt_atlantis_config = optional(object({
+      enabled  = optional(bool, false)
+      output   = optional(string, "atlantis.yaml")
+      autoplan = optional(bool, false)
+      parallel = optional(bool, false)
+      filter   = optional(string)
+    }), {})
   })
   default = {}
 }

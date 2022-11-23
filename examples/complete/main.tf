@@ -16,6 +16,10 @@ module "repo_config" {
       allowed_overrides               = ["workflow", "delete_source_branch_on_merge"]
       allow_custom_workflows          = true
       allow_all_server_side_workflows = true
+
+      terragrunt_atlantis_config = {
+        enabled = true
+      }
     }
   ]
 
