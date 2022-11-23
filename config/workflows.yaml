@@ -1,0 +1,30 @@
+workflows:
+  terraform-basic:
+    plan:
+      steps:
+        - run: terraform init
+        - run: terraform plan -no-color -input=false -out $PLANFILE
+    apply:
+      steps:
+        - run: terraform apply -no-color -input=false -compact-warnings -auto-approve $PLANFILE
+
+  terragrunt-basic:
+    plan:
+      steps:
+        - run: terragrunt fmt -no-color -check=true -diff=true -write=false
+        - run: terragrunt hclfmt --terragrunt-check
+        - run: terragrunt plan -no-color -out $PLANFILE
+    apply:
+      steps:
+        - run: terragrunt apply -no-color -input=false -compact-warnings -auto-approve $PLANFILE
+
+  terragrunt-basic-with-asdf:
+    plan:
+      steps:
+        - run: asdf install
+        - run: terragrunt fmt -no-color -check=true -diff=true -write=false
+        - run: terragrunt hclfmt --terragrunt-check
+        - run: terragrunt plan -no-color -out $PLANFILE
+    apply:
+      steps:
+        - run: terragrunt apply -no-color -input=false -compact-warnings -auto-approve $PLANFILE
