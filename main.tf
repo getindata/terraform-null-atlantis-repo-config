@@ -28,24 +28,27 @@ locals {
   )]
 
   #Remove all options that are null
-  workflows = { for workflow_name, workflow in merge(
+  workflows = merge(
     var.use_predefined_workflows ? yamldecode(file("${path.module}/config/workflows.yaml")).workflows : {},
-    var.workflows
-    ) : workflow_name => {
-    for k, v in workflow : k => v if v != null
-  } }
+    { for workflow_name, workflow in var.workflows : workflow_name => {
+      for k, v in workflow : k => v if v != null
+    } }
+  )
 
   repo_config = {
     repos     = local.repos
     workflows = local.workflows
   }
+
+  repo_config_json = jsonencode(local.repo_config)
+  repo_config_yaml = replace(yamlencode(local.repo_config), "/((?:^|\n)[\\s-]*)\"([\\w-]+)\":/", "$1$2:")
 }
 
 resource "local_file" "repo_config" {
   count = var.repo_config_file_generation_enabled ? 1 : 0
   content = (var.repo_config_file_format == "json"
-    ? jsonencode(local.repo_config)
-    : replace(yamlencode(local.repo_config), "/((?:^|\n)[\\s-]*)\"([\\w-]+)\":/", "$1$2:")
+    ? local.repo_config_json
+    : local.repo_config_yaml
   )
   filename        = format("%s/%s", var.repo_config_file_path, var.repo_config_file_name)
   file_permission = "0644"

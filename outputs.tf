@@ -15,5 +15,10 @@ output "repo_config" {
 
 output "repos_config_json" {
   description = "Repo config converted to json string"
-  value       = jsonencode(local.repo_config)
+  value       = local.repo_config_json
+}
+
+output "repos_config_yaml" {
+  description = "Repo config converted to json string"
+  value       = local.repo_config_yaml
 }

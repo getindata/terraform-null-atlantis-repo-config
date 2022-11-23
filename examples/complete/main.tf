@@ -18,7 +18,8 @@ module "repo_config" {
       allow_all_server_side_workflows = true
 
       terragrunt_atlantis_config = {
-        enabled = true
+        enabled  = true
+        autoplan = true
       }
     }
   ]

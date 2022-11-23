@@ -84,6 +84,7 @@ No modules.
 | <a name="output_repo_config"></a> [repo\_config](#output\_repo\_config) | Repo config object |
 | <a name="output_repos"></a> [repos](#output\_repos) | List of repos config |
 | <a name="output_repos_config_json"></a> [repos\_config\_json](#output\_repos\_config\_json) | Repo config converted to json string |
+| <a name="output_repos_config_yaml"></a> [repos\_config\_yaml](#output\_repos\_config\_yaml) | Repo config converted to json string |
 | <a name="output_workflows"></a> [workflows](#output\_workflows) | Custom Atlantis workflows |
 
 ## Providers
