@@ -44,5 +44,7 @@ module "repo_config" {
     }
   }
 
-  repo_config_file_generation_enabled = true
+  repo_config_file = {
+    enabled = true
+  }
 }
