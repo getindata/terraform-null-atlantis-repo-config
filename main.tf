@@ -53,11 +53,11 @@ locals {
 }
 
 resource "local_file" "repo_config" {
-  count = var.repo_config_file_generation_enabled ? 1 : 0
-  content = (var.repo_config_file_format == "json"
+  count = var.repo_config_file.enabled ? 1 : 0
+  content = (var.repo_config_file.format == "json"
     ? local.repo_config_json
     : local.repo_config_yaml
   )
-  filename        = format("%s/%s", var.repo_config_file_path, var.repo_config_file_name)
+  filename        = format("%s/%s", var.repo_config_file.path, var.repo_config_file.name)
   file_permission = "0644"
 }

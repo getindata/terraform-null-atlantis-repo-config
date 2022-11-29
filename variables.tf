@@ -83,31 +83,18 @@ variable "use_predefined_workflows" {
   default     = true
 }
 
-variable "repo_config_file_generation_enabled" {
-  description = "Indicates wherever the config file should be generated"
-  type        = bool
-  default     = false
-}
-
-variable "repo_config_file_path" {
-  description = "Path where the repo config file should be generated"
-  type        = string
-  default     = "."
-}
-
-variable "repo_config_file_name" {
-  description = "Name of the repo config file"
-  type        = string
-  default     = "repo_config.yaml"
-}
-
-variable "repo_config_file_format" {
-  description = "Format of the repo config file that will be generated. Possible values: yaml or json"
-  type        = string
-  default     = "yaml"
+variable "repo_config_file" {
+  description = "Configures config file generation if enabled"
+  type = object({
+    enabled = optional(bool, false)
+    path    = optional(string, ".")
+    name    = optional(string, "repo_config.yaml")
+    format  = optional(string, "yaml")
+  })
+  default = {}
 
   validation {
-    condition     = contains(["yaml", "json"], var.repo_config_file_format)
+    condition     = contains(["yaml", "json"], var.repo_config_file.format)
     error_message = "Invalid format provided. Allowed values: yaml, json"
   }
 }
