@@ -21,6 +21,7 @@ locals {
           run : join(" ", compact(
             [
               "terragrunt-atlantis-config",
+              "generate",
               format("--output %s", repo.terragrunt_atlantis_config.output),
               repo.terragrunt_atlantis_config.filter != null ? format("--filter %s", repo.terragrunt_atlantis_config.filter) : null,
               repo.terragrunt_atlantis_config.parallel != null ? format("--parallel=%s", repo.terragrunt_atlantis_config.parallel) : null,
