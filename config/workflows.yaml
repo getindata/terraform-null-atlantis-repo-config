@@ -13,7 +13,6 @@ workflows:
       steps:
         - run: terragrunt fmt -no-color -check=true -diff=true -write=false
         - run: terragrunt hclfmt --terragrunt-check
-        - run: terragrunt validate
         - run: terragrunt plan -no-color -out $PLANFILE
     apply:
       steps:
@@ -25,7 +24,6 @@ workflows:
         - run: asdf install
         - run: terragrunt fmt -no-color -check=true -diff=true -write=false
         - run: terragrunt hclfmt --terragrunt-check
-        - run: terragrunt validate
         - run: terragrunt plan -no-color -out $PLANFILE
     apply:
       steps:
@@ -37,7 +35,6 @@ workflows:
         - run: asdf install
         - run: terragrunt fmt -no-color -check=true -diff=true -write=false
         - run: terragrunt hclfmt --terragrunt-check
-        - run: terragrunt validate
         # Create fake terraform-plan...
         - run: terragrunt show -json > $PLANFILE
     apply:
@@ -51,7 +48,6 @@ workflows:
         - run: asdf install
         - run: terragrunt fmt -no-color -check=true -diff=true -write=false
         - run: terragrunt hclfmt --terragrunt-check
-        - run: terragrunt validate
         - run: terragrunt plan -no-color -out $PLANFILE
     apply:
       steps:
