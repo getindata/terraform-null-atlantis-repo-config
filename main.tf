@@ -22,8 +22,8 @@ locals {
             [
               "terragrunt-atlantis-config",
               "generate",
-              format("--output %s", repo.terragrunt_atlantis_config.output),
-              repo.terragrunt_atlantis_config.filter != null ? format("--filter %s", repo.terragrunt_atlantis_config.filter) : null,
+              format("--output \"%s\"", repo.terragrunt_atlantis_config.output),
+              repo.terragrunt_atlantis_config.filter != null ? format("--filter \"%s\"", repo.terragrunt_atlantis_config.filter) : null,
               repo.terragrunt_atlantis_config.parallel != null ? format("--parallel=%s", repo.terragrunt_atlantis_config.parallel) : null,
               repo.terragrunt_atlantis_config.autoplan != null ? format("--autoplan=%s", repo.terragrunt_atlantis_config.autoplan) : null,
               repo.terragrunt_atlantis_config.automerge != null ? format("--automerge=%s", repo.terragrunt_atlantis_config.automerge) : null,
