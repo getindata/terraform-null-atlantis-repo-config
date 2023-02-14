@@ -53,3 +53,17 @@ workflows:
       steps:
         - run: check-gitlab-approvals.sh
         - run: terragrunt apply -no-color -input=false -compact-warnings -auto-approve $PLANFILE
+
+  terragrunt-basic-with-asdf-for-external-repos-and-approval-config:
+    plan:
+      steps:
+        - run: asdf install
+        - multienv: pull-gitlab-variables.sh
+        - run: terragrunt fmt -no-color -check=true -diff=true -write=false
+        - run: terragrunt hclfmt --terragrunt-check
+        - run: terragrunt plan -no-color -out $PLANFILE
+    apply:
+      steps:
+        - run: check-gitlab-approvals.sh
+        - multienv: pull-gitlab-variables.sh
+        - run: terragrunt apply -no-color -input=false -compact-warnings -auto-approve $PLANFILE
