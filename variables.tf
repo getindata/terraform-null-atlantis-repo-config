@@ -76,6 +76,9 @@ variable "workflows" {
     policy_check = optional(object({
       steps = any
     }))
+    checkov = optional({
+      enabled = optional(bool, false)
+    }, {})
   }))
   default = {}
 }
