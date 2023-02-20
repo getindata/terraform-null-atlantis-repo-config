@@ -26,7 +26,6 @@ variable "repos" {
       cascade_dependencies = optional(bool)
       filter               = optional(string)
       use_project_markers  = optional(bool)
-      checkov              = optional(bool, false)
     }), {})
   }))
   default = []
@@ -42,7 +41,9 @@ variable "repos_common_config" {
     allowed_workflows             = optional(list(string))
     allow_custom_workflows        = optional(bool)
     delete_source_branch_on_merge = optional(bool)
-    checkov                       = optional(bool, false)
+    checkov = optional({
+      enabled = optional(bool, false)
+    }, {})
     pre_workflow_hooks = optional(list(object({
       run = string
     })))
