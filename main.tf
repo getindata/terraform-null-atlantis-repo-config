@@ -34,15 +34,42 @@ locals {
       }]) } : {},
   )]
 
+  workflows_helper_options = ["asdf", "checkov", "pull_gitlab_variables", "check_gitlab_approvals"]
+
+  default_workflow_features = {
+    pull_gitlab_variables  = { enabled = false },
+    asdf                   = { enabled = false },
+    checkov                = { enabled = false },
+    check_gitlab_approvals = { enabled = false },
+  }
+
   #Remove all options that are null
-  workflows = merge(
-    var.use_predefined_workflows ? yamldecode(file("${path.module}/config/workflows.yaml")).workflows : {},
+  predefined_workflows = var.use_predefined_workflows ? yamldecode(file("${path.module}/config/workflows.yaml")).workflows : null
+  merged_workflows = merge(
+    {
+      for workflow_name, workflow in merge({}, local.predefined_workflows) : workflow_name =>
+        merge(local.default_workflow_features, workflow)
+    },
     {
       for workflow_name, workflow in var.workflows : workflow_name => {
         for k, v in workflow : k => v if v != null
       }
     }
   )
+
+  workflows = {
+    for workflow_name, workflow in local.merged_workflows : workflow_name => {
+      for k, v in workflow : k => {
+        for nk, nv in v : nk =>
+        concat(
+          workflow.pull_gitlab_variables.enabled ? [{ multienv = "pull_gitlab_variables.sh" }] : [],
+          workflow.check_gitlab_approvals.enabled && k == "apply" ? [{ run = "check_gitlab_approvals.sh" }] : [],
+          nv,
+          workflow.checkov.enabled && k == "plan" ? [{ run = "checkov run" }] : [])
+        if nk == "steps"
+      } if v != null && !contains(local.workflows_helper_options, k)
+    }
+  }
 
   repo_config = {
     repos     = local.repos

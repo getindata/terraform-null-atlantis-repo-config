@@ -41,6 +41,9 @@ module "repo_config" {
           }
         ]
       }
+      checkov                = { enabled : true }
+      pull_gitlab_variables  = { enabled : true }
+      check_gitlab_approvals = { enabled : true }
     }
   }
 

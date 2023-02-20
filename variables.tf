@@ -41,9 +41,6 @@ variable "repos_common_config" {
     allowed_workflows             = optional(list(string))
     allow_custom_workflows        = optional(bool)
     delete_source_branch_on_merge = optional(bool)
-    checkov = optional({
-      enabled = optional(bool, false)
-    }, {})
     pre_workflow_hooks = optional(list(object({
       run = string
     })))
@@ -76,9 +73,18 @@ variable "workflows" {
     policy_check = optional(object({
       steps = any
     }))
-    checkov = optional({
+    asdf = optional(object({
       enabled = optional(bool, false)
-    }, {})
+    }), {})
+    checkov = optional(object({
+      enabled = optional(bool, false)
+    }), {})
+    pull_gitlab_variables = optional(object({
+      enabled = optional(bool, false)
+    }), {})
+    check_gitlab_approvals = optional(object({
+      enabled = optional(bool, false)
+    }), {})
   }))
   default = {}
 }

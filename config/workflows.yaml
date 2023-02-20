@@ -19,9 +19,10 @@ workflows:
         - run: terragrunt apply -no-color -input=false -compact-warnings -auto-approve $PLANFILE
 
   terragrunt-basic-with-asdf:
+    asdf:
+      enabled: true
     plan:
       steps:
-        - run: asdf install
         - run: terragrunt fmt -no-color -check=true -diff=true -write=false
         - run: terragrunt hclfmt --terragrunt-check
         - run: terragrunt plan -no-color -out $PLANFILE
@@ -30,9 +31,10 @@ workflows:
         - run: terragrunt apply -no-color -input=false -compact-warnings -auto-approve $PLANFILE
 
   terragrunt-basic-check-with-asdf:
+    asdf:
+      enabled: true
     plan:
       steps:
-        - run: asdf install
         - run: terragrunt fmt -no-color -check=true -diff=true -write=false
         - run: terragrunt hclfmt --terragrunt-check
         # Create fake terraform-plan...
@@ -43,27 +45,33 @@ workflows:
         - run: "echo 'This is CHECK-ONLY workflow - run `terragrunt apply` manually'"
 
   terragrunt-basic-with-asdf-and-approval-config:
+    asdf:
+      enabled: true
+    check_gitlab_approvals:
+      enabled: true
     plan:
       steps:
-        - run: asdf install
         - run: terragrunt fmt -no-color -check=true -diff=true -write=false
         - run: terragrunt hclfmt --terragrunt-check
         - run: terragrunt plan -no-color -out $PLANFILE
     apply:
       steps:
-        - run: check-gitlab-approvals.sh
         - run: terragrunt apply -no-color -input=false -compact-warnings -auto-approve $PLANFILE
 
   terragrunt-basic-with-asdf-for-external-repos-and-approval-config:
+    asdf:
+      enabled: true
+    pull_gitlab_variables:
+      enabled: true
+    check_gitlab_approvals:
+      enabled: true
+    checkov:
+      enabled: false
     plan:
       steps:
-        - run: asdf install
-        - multienv: pull-gitlab-variables.sh
         - run: terragrunt fmt -no-color -check=true -diff=true -write=false
         - run: terragrunt hclfmt --terragrunt-check
         - run: terragrunt plan -no-color -out $PLANFILE
     apply:
       steps:
-        - multienv: pull-gitlab-variables.sh
-        - run: check-gitlab-approvals.sh
         - run: terragrunt apply -no-color -input=false -compact-warnings -auto-approve $PLANFILE
