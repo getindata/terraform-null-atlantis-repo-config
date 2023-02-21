@@ -41,6 +41,22 @@ module "repo_config" {
           }
         ]
       }
+      template = "terragrunt-basic-check"
+    }
+    terragrunt-my-basic = {
+      plan = {
+        steps = [
+          {
+            run : "echo \"before plan\""
+          },
+          {
+            atlantis_step : { command : "plan", extra_args : ["-no-color"] }
+          }
+        ]
+      }
+      checkov                = { enabled = true }
+      check_gitlab_approvals = { enabled = true }
+      asdf                   = { enabled = true }
     }
   }
 
