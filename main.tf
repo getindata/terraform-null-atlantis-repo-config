@@ -65,8 +65,8 @@ locals {
     for workflow_name, workflow in local.pre_workflows : workflow_name => {
       for stage_name, stage in workflow : stage_name => { steps : concat(
         workflow.asdf.enabled && stage_name == "plan" ? [{ run = "asdf install" }] : [],
-        workflow.pull_gitlab_variables.enabled ? [{ multienv = "pull_gitlab_variables.sh" }] : [],
-        workflow.check_gitlab_approvals.enabled && stage_name == "apply" ? [{ run = "check_gitlab_approvals.sh" }] : [],
+        workflow.pull_gitlab_variables.enabled ? [{ multienv = "pull-gitlab-variables.sh" }] : [],
+        workflow.check_gitlab_approvals.enabled && stage_name == "apply" ? [{ run = "check-gitlab-approvals.sh" }] : [],
         flatten([
           for step in stage.steps : [
             for name, object in step :
