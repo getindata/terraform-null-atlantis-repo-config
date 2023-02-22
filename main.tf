@@ -36,7 +36,7 @@ locals {
 
   workflows_helper_options = ["asdf", "checkov", "pull_gitlab_variables", "check_gitlab_approvals", "template"]
 
-  pre_workflows = merge({
+  pre_workflows = {
     for workflow_name, workflow in var.workflows : workflow_name => {
       plan = merge(
         local.null_workflow.plan,
@@ -54,14 +54,14 @@ locals {
         local.null_workflow.state_rm,
         can(workflow.template) ? local.workflow_templates[workflow["template"]].state_rm : null,
       workflow.state_rm),
-      pull_gitlab_variables  = merge({ enabled = false }, workflow.pull_gitlab_variables)
-      asdf                   = merge({ enabled = false }, workflow.asdf)
-      checkov                = merge({ enabled = false }, workflow.checkov)
-      check_gitlab_approvals = merge({ enabled = false }, workflow.check_gitlab_approvals)
+      pull_gitlab_variables  = workflow.pull_gitlab_variables
+      asdf                   = workflow.asdf
+      checkov                = workflow.checkov
+      check_gitlab_approvals = workflow.check_gitlab_approvals
     }
-  })
+  }
 
-  workflows = merge({
+  workflows = {
     for workflow_name, workflow in local.pre_workflows : workflow_name => {
       for stage_name, stage in workflow : stage_name => { steps : concat(
         workflow.asdf.enabled && stage_name == "plan" ? [{ run = "asdf install" }] : [],
@@ -77,10 +77,11 @@ locals {
             )
             if object != null
         ]]),
-        [for e in ["show", { run = "checkov -f $SHOWFILE -o github_failed_only --soft-fail" }] : e if workflow.checkov.enabled && stage_name == "plan"]
+        [for e in["show", { run = format("checkov -f $SHOWFILE -o github_failed_only %s", workflow.checkov.soft_fail ? "--soft-fail" : "") }] : e
+         if workflow.checkov.enabled && stage_name == "plan"]
       ) } if !contains(local.workflows_helper_options, stage_name) && lookup(stage, "steps", null) != null
     }
-  })
+  }
 
   repo_config = {
     repos     = local.repos

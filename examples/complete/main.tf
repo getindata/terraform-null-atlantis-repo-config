@@ -54,7 +54,7 @@ module "repo_config" {
           }
         ]
       }
-      checkov                = { enabled = true }
+      checkov                = { enabled = true, soft_fail = true }
       check_gitlab_approvals = { enabled = true }
       asdf                   = { enabled = true }
     }

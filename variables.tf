@@ -123,16 +123,17 @@ variable "workflows" {
     template = optional(string, "terragrunt-basic")
     asdf = optional(object({
       enabled = optional(bool, false)
-    }))
+    }), {})
     checkov = optional(object({
-      enabled = optional(bool, false)
-    }))
+      enabled   = optional(bool, false)
+      soft_fail = optional(bool, false)
+    }), {})
     pull_gitlab_variables = optional(object({
       enabled = optional(bool, false)
-    }))
+    }), {})
     check_gitlab_approvals = optional(object({
       enabled = optional(bool, false)
-    })),
+    }), {}),
   }))
   default = {}
 }
