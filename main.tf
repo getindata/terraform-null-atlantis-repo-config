@@ -77,7 +77,7 @@ locals {
             )
             if object != null
         ]]),
-        [for e in["show", { run = format("checkov -f $SHOWFILE -o github_failed_only %s", workflow.checkov.soft_fail ? "--soft-fail" : "") }] : e
+        [for e in ["show", { run = format("checkov -f $SHOWFILE -o github_failed_only %s", workflow.checkov.soft_fail ? "--soft-fail" : "") }] : e
         if workflow.checkov.enabled && stage_name == "plan"]
       ) } if !contains(local.workflows_helper_options, stage_name) && lookup(stage, "steps", null) != null
     }
