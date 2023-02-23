@@ -61,12 +61,16 @@ locals {
     }
   }
 
+  asdf_steps                   = [{ run = "asdf install" }]
+  pull_gitlab_variables_steps  = [{ multienv = "pull-gitlab-variables.sh" }]
+  check_gitlab_approvals_steps = [{ run = "check-gitlab-approvals.sh" }]
+
   workflows = {
     for workflow_name, workflow in local.pre_workflows : workflow_name => {
       for stage_name, stage in workflow : stage_name => { steps : concat(
-        workflow.asdf.enabled && stage_name == "plan" ? [{ run = "asdf install" }] : [],
-        workflow.pull_gitlab_variables.enabled ? [{ multienv = "pull-gitlab-variables.sh" }] : [],
-        workflow.check_gitlab_approvals.enabled && stage_name == "apply" ? [{ run = "check-gitlab-approvals.sh" }] : [],
+        workflow.asdf.enabled && stage_name == "plan" ? local.asdf_steps : [],
+        workflow.pull_gitlab_variables.enabled ? local.pull_gitlab_variables_steps : [],
+        workflow.check_gitlab_approvals.enabled && stage_name == "apply" ? local.check_gitlab_approvals_steps : [],
         flatten([
           for step in stage.steps : [
             for name, object in step :
@@ -77,8 +81,19 @@ locals {
             )
             if object != null
         ]]),
-        [for e in ["show", { run = format("checkov -f $SHOWFILE -o github_failed_only %s", workflow.checkov.soft_fail ? "--soft-fail" : "") }] : e
-        if workflow.checkov.enabled && stage_name == "plan"]
+        workflow.checkov.enabled && stage_name == "plan" ? [
+          { run = "terragrunt show -json $PLANFILE > $SHOWFILE" },
+          {
+            run = join(" ", compact(
+              [
+                "checkov",
+                format("--file \"%s\"", workflow.checkov.file),
+                "--output github_failed_only",
+                workflow.checkov.soft_fail != null ? "--soft-fail" : null
+              ]
+            ))
+          }
+        ] : []
       ) } if !contains(local.workflows_helper_options, stage_name) && lookup(stage, "steps", null) != null
     }
   }

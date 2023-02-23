@@ -127,6 +127,7 @@ variable "workflows" {
     checkov = optional(object({
       enabled   = optional(bool, false)
       soft_fail = optional(bool, false)
+      file      = optional(string, "$SHOWFILE")
     }), {})
     pull_gitlab_variables = optional(object({
       enabled = optional(bool, false)
