@@ -15,6 +15,8 @@ locals {
   }
 
   workflow_templates = {
+    null_workflow = local.null_workflow
+
     terragrunt-basic = merge(local.null_workflow, {
       plan = {
         steps = [

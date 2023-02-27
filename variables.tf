@@ -73,7 +73,7 @@ variable "workflows" {
         run      = optional(string)
         multienv = optional(string)
         atlantis_step = optional(object({
-          command    = string // one of: [init, plan, apply, import, state_rm]
+          command    = string
           extra_args = optional(list(string))
         }))
       })))
@@ -87,7 +87,7 @@ variable "workflows" {
         run      = optional(string)
         multienv = optional(string)
         atlantis_step = optional(object({
-          command    = string // one of: [init, plan, apply, import, state_rm]
+          command    = string
           extra_args = optional(list(string))
         }))
       })))
@@ -101,7 +101,7 @@ variable "workflows" {
         run      = optional(string)
         multienv = optional(string)
         atlantis_step = optional(object({
-          command    = string // one of: [init, plan, apply, import, state_rm]
+          command    = string
           extra_args = optional(list(string))
         }))
       })))
@@ -115,7 +115,7 @@ variable "workflows" {
         run      = optional(string)
         multienv = optional(string)
         atlantis_step = optional(object({
-          command    = string // one of: [init, plan, apply, import, state_rm]
+          command    = string
           extra_args = optional(list(string))
         }))
       })))
@@ -137,6 +137,40 @@ variable "workflows" {
     }), {}),
   }))
   default = {}
+
+  validation {
+    condition = alltrue(flatten([
+      for workflow_name, workflow in var.workflows :
+      [
+        for stage_name, stage in [workflow.plan, workflow.apply, workflow.import, workflow.state_rm] :
+        [
+          for step in stage.steps : (length([
+            for x in [step.env, step.run, step.multienv, step.atlantis_step] : x if x != null
+          ]) == 1)
+        ]
+        if !contains([
+          "asdf", "checkov", "pull_gitlab_variables", "check_gitlab_approvals", "template"
+        ], stage_name) && stage != null
+      ]
+    ]))
+    error_message = "Exactly one of `env`, `run`, `multienv` or `atlantis_step` per stage must be specified"
+  }
+
+  validation {
+    condition = alltrue(flatten([
+      for workflow_name, workflow in var.workflows :
+      [
+        for stage_name, stage in [workflow.plan, workflow.apply, workflow.import, workflow.state_rm] :
+        [
+          for step in stage.steps : contains([
+            "init", "plan", "show", "policy_check", "apply", "version", "import", "state_rm"
+          ], step.atlantis_step.command)
+          if lookup(step, "atlantis_step", null) != null
+        ] if stage != null
+      ]
+    ]))
+    error_message = "Invalid command in `atlantis_step`. Allowed values: init, plan, show, policy_check, apply, version, import, state_rm"
+  }
 }
 
 variable "repo_config_file" {
