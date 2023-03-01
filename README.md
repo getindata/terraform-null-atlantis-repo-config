@@ -13,7 +13,7 @@
 
 ---
 
-This module generates a server side repo config that cab be passed to Atlantis server.
+This module generates a server side repo config that can be passed to Atlantis server.
 It also contains a set of opinionated custom workflows that are ready for usage. 
 
 ## USAGE
@@ -36,17 +36,14 @@ module "template" {
   }
 
   workflows = {
-    terraform-basic-with-fmt = {
-      plan = {
-        steps = [
-          {
-            run = "terraform fmt -no-color -check=true -diff=true -write=false"
-          },
-          {
-            run = "terraform plan -no-color -input=false -out $PLANFILE"
-          }
-        ]
+    terragrunt-basic-with-features = {
+      import = {
+        steps = []
       }
+      
+      checkov                = { enabled = true, soft_fail = true }
+      check_gitlab_approvals = { enabled = true }
+      asdf                   = { enabled = true }
     }
   }
 }
