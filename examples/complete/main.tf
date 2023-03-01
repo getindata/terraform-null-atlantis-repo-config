@@ -26,21 +26,32 @@ module "repo_config" {
 
   repos_common_config = {
     apply_requirements = ["approved", "mergeable"]
-    branch             = "main"
+    branch             = "/main/"
   }
 
   workflows = {
     terraform-basic-with-fmt = {
       plan = {
         steps = [
-          {
-            run = "terraform fmt -no-color -check=true -diff=true -write=false"
-          },
-          {
-            run = "terraform plan -no-color -input=false -out $PLANFILE"
-          }
+          { run = "terraform fmt -no-color -check=true -diff=true -write=false" },
+          { run = "echo \"Formatting done, start planning...\"" },
+          { atlantis_step = { command = "plan", extra_args = ["-no-color"] } }
         ]
       }
+      template = "null_workflow"
+    }
+
+    terragrunt-basic-with-features = {
+      checkov                = { enabled = true, soft_fail = true }
+      check_gitlab_approvals = { enabled = true }
+      asdf                   = { enabled = true }
+    }
+
+    terragrunt-basic-check-with-features = {
+      template              = "terragrunt-basic-check"
+      checkov               = { enabled = true }
+      pull_gitlab_variables = { enabled = true }
+      asdf                  = { enabled = true }
     }
   }
 

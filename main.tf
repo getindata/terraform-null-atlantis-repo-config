@@ -34,15 +34,69 @@ locals {
       }]) } : {},
   )]
 
-  #Remove all options that are null
-  workflows = merge(
-    var.use_predefined_workflows ? yamldecode(file("${path.module}/config/workflows.yaml")).workflows : {},
-    {
-      for workflow_name, workflow in var.workflows : workflow_name => {
-        for k, v in workflow : k => v if v != null
-      }
+  workflows_helper_options = ["asdf", "checkov", "pull_gitlab_variables", "check_gitlab_approvals", "template"]
+
+  pre_workflows = {
+    for workflow_name, workflow in var.workflows : workflow_name => {
+      plan = merge(
+        local.null_workflow.plan,
+        can(workflow.template) ? local.workflow_templates[workflow["template"]].plan : null,
+      workflow.plan)
+      apply = merge(
+        local.null_workflow.apply,
+        can(workflow.template) ? local.workflow_templates[workflow["template"]].apply : null,
+      workflow.apply),
+      import = merge(
+        local.null_workflow.import,
+        can(workflow.template) ? local.workflow_templates[workflow["template"]].import : null,
+      workflow.import)
+      state_rm = merge(
+        local.null_workflow.state_rm,
+        can(workflow.template) ? local.workflow_templates[workflow["template"]].state_rm : null,
+      workflow.state_rm),
+      pull_gitlab_variables  = workflow.pull_gitlab_variables
+      asdf                   = workflow.asdf
+      checkov                = workflow.checkov
+      check_gitlab_approvals = workflow.check_gitlab_approvals
     }
-  )
+  }
+
+  asdf_steps                   = [{ run = "asdf install" }]
+  pull_gitlab_variables_steps  = [{ multienv = "pull-gitlab-variables.sh" }]
+  check_gitlab_approvals_steps = [{ run = "check-gitlab-approvals.sh" }]
+
+  workflows = {
+    for workflow_name, workflow in local.pre_workflows : workflow_name => {
+      for stage_name, stage in workflow : stage_name => { steps : concat(
+        workflow.asdf.enabled && stage_name == "plan" ? local.asdf_steps : [],
+        workflow.pull_gitlab_variables.enabled ? local.pull_gitlab_variables_steps : [],
+        workflow.check_gitlab_approvals.enabled && stage_name == "apply" ? local.check_gitlab_approvals_steps : [],
+        flatten([
+          for step in stage.steps : [
+            for name, object in step :
+            jsondecode(
+              name == "atlantis_step" ?
+              (object.extra_args != null ? jsonencode({ (object.command) : { extra_args : object.extra_args } }) : jsonencode(object.command)) :
+              jsonencode({ (name) : object })
+            )
+            if object != null
+        ]]),
+        workflow.checkov.enabled && stage_name == "plan" ? [
+          { run = "terragrunt show -json $PLANFILE > $SHOWFILE" },
+          {
+            run = join(" ", compact(
+              [
+                "checkov",
+                format("--file \"%s\"", workflow.checkov.file),
+                "--output github_failed_only",
+                workflow.checkov.soft_fail != null ? "--soft-fail" : null
+              ]
+            ))
+          }
+        ] : []
+      ) } if !contains(local.workflows_helper_options, stage_name) && lookup(stage, "steps", null) != null
+    }
+  }
 
   repo_config = {
     repos     = local.repos
@@ -50,7 +104,9 @@ locals {
   }
 
   repo_config_json = jsonencode(local.repo_config)
-  repo_config_yaml = replace(yamlencode(local.repo_config), "/((?:^|\n)[\\s-]*)\"([\\w-]+)\":/", "$1$2:")
+  repo_config_yaml = replace(
+    replace(yamlencode(local.repo_config), "/((?:^|\n)[\\s-]*)\"([\\w-]+)\":/", "$1$2:"),
+  "/((?:^|\n)[\\s-]*)\"([\\w-]+)\"/", "$1$2")
 }
 
 resource "local_file" "repo_config" {

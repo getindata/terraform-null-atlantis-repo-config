@@ -65,22 +65,112 @@ variable "workflows" {
   description = "List of custom workflow that will be added to the repo config file"
   type = map(object({
     plan = optional(object({
-      steps = any
+      steps = optional(list(object({
+        env = optional(object({
+          name    = string
+          command = string
+        }))
+        run      = optional(string)
+        multienv = optional(string)
+        atlantis_step = optional(object({
+          command    = string
+          extra_args = optional(list(string))
+        }))
+      })))
     }))
     apply = optional(object({
-      steps = any
+      steps = optional(list(object({
+        env = optional(object({
+          name    = string
+          command = string
+        }))
+        run      = optional(string)
+        multienv = optional(string)
+        atlantis_step = optional(object({
+          command    = string
+          extra_args = optional(list(string))
+        }))
+      })))
     }))
-    policy_check = optional(object({
-      steps = any
+    import = optional(object({
+      steps = optional(list(object({
+        env = optional(object({
+          name    = string
+          command = string
+        }))
+        run      = optional(string)
+        multienv = optional(string)
+        atlantis_step = optional(object({
+          command    = string
+          extra_args = optional(list(string))
+        }))
+      })))
     }))
+    state_rm = optional(object({
+      steps = optional(list(object({
+        env = optional(object({
+          name    = string
+          command = string
+        }))
+        run      = optional(string)
+        multienv = optional(string)
+        atlantis_step = optional(object({
+          command    = string
+          extra_args = optional(list(string))
+        }))
+      })))
+    }))
+    template = optional(string, "terragrunt-basic")
+    asdf = optional(object({
+      enabled = optional(bool, false)
+    }), {})
+    checkov = optional(object({
+      enabled   = optional(bool, false)
+      soft_fail = optional(bool, false)
+      file      = optional(string, "$SHOWFILE")
+    }), {})
+    pull_gitlab_variables = optional(object({
+      enabled = optional(bool, false)
+    }), {})
+    check_gitlab_approvals = optional(object({
+      enabled = optional(bool, false)
+    }), {}),
   }))
   default = {}
-}
 
-variable "use_predefined_workflows" {
-  description = "Indicates wherever predefined workflows should be added to the generated repo config file"
-  type        = bool
-  default     = true
+  validation {
+    condition = alltrue(flatten([
+      for workflow_name, workflow in var.workflows :
+      [
+        for stage_name, stage in [workflow.plan, workflow.apply, workflow.import, workflow.state_rm] :
+        [
+          for step in stage.steps : (length([
+            for x in [step.env, step.run, step.multienv, step.atlantis_step] : x if x != null
+          ]) == 1)
+        ]
+        if !contains([
+          "asdf", "checkov", "pull_gitlab_variables", "check_gitlab_approvals", "template"
+        ], stage_name) && stage != null
+      ]
+    ]))
+    error_message = "Exactly one of `env`, `run`, `multienv` or `atlantis_step` per stage must be specified"
+  }
+
+  validation {
+    condition = alltrue(flatten([
+      for workflow_name, workflow in var.workflows :
+      [
+        for stage_name, stage in [workflow.plan, workflow.apply, workflow.import, workflow.state_rm] :
+        [
+          for step in stage.steps : contains([
+            "init", "plan", "show", "policy_check", "apply", "version", "import", "state_rm"
+          ], step.atlantis_step.command)
+          if lookup(step, "atlantis_step", null) != null
+        ] if stage != null
+      ]
+    ]))
+    error_message = "Invalid command in `atlantis_step`. Allowed values: init, plan, show, policy_check, apply, version, import, state_rm"
+  }
 }
 
 variable "repo_config_file" {

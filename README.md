@@ -13,7 +13,7 @@
 
 ---
 
-This module generates a server side repo config that cab be passed to Atlantis server.
+This module generates a server side repo config that can be passed to Atlantis server.
 It also contains a set of opinionated custom workflows that are ready for usage. 
 
 ## USAGE
@@ -36,17 +36,14 @@ module "template" {
   }
 
   workflows = {
-    terraform-basic-with-fmt = {
-      plan = {
-        steps = [
-          {
-            run = "terraform fmt -no-color -check=true -diff=true -write=false"
-          },
-          {
-            run = "terraform plan -no-color -input=false -out $PLANFILE"
-          }
-        ]
+    terragrunt-basic-with-features = {
+      import = {
+        steps = []
       }
+      
+      checkov                = { enabled = true, soft_fail = true }
+      check_gitlab_approvals = { enabled = true }
+      asdf                   = { enabled = true }
     }
   }
 }
@@ -67,8 +64,7 @@ module "template" {
 | <a name="input_repo_config_file"></a> [repo\_config\_file](#input\_repo\_config\_file) | Configures config file generation if enabled | <pre>object({<br>    enabled = optional(bool, false)<br>    path    = optional(string, ".")<br>    name    = optional(string, "repo_config.yaml")<br>    format  = optional(string, "yaml")<br>  })</pre> | `{}` | no |
 | <a name="input_repos"></a> [repos](#input\_repos) | Map of repositories and their configs. Refer to https://www.runatlantis.io/docs/server-side-repo-config.html#example-server-side-repo | <pre>list(object({<br>    id                            = optional(string, "/.*/")<br>    branch                        = optional(string)<br>    apply_requirements            = optional(list(string))<br>    allowed_overrides             = optional(list(string))<br>    allowed_workflows             = optional(list(string))<br>    allow_custom_workflows        = optional(bool)<br>    delete_source_branch_on_merge = optional(bool)<br>    pre_workflow_hooks = optional(list(object({<br>      run = string<br>    })))<br>    post_workflow_hooks = optional(list(object({<br>      run = string<br>    })))<br>    workflow = optional(string)<br>    ######### Helpers #########<br>    allow_all_server_side_workflows = optional(bool, false)<br>    terragrunt_atlantis_config = optional(object({<br>      enabled              = optional(bool, false)<br>      output               = optional(string, "atlantis.yaml")<br>      automerge            = optional(bool)<br>      autoplan             = optional(bool)<br>      parallel             = optional(bool)<br>      cascade_dependencies = optional(bool)<br>      filter               = optional(string)<br>      use_project_markers  = optional(bool)<br>    }), {})<br>  }))</pre> | `[]` | no |
 | <a name="input_repos_common_config"></a> [repos\_common\_config](#input\_repos\_common\_config) | Common config that will be merged into each item of the repos list | <pre>object({<br>    id                            = optional(string)<br>    branch                        = optional(string)<br>    apply_requirements            = optional(list(string))<br>    allowed_overrides             = optional(list(string))<br>    allowed_workflows             = optional(list(string))<br>    allow_custom_workflows        = optional(bool)<br>    delete_source_branch_on_merge = optional(bool)<br>    pre_workflow_hooks = optional(list(object({<br>      run = string<br>    })))<br>    post_workflow_hooks = optional(list(object({<br>      run = string<br>    })))<br>    workflow = optional(string)<br>    ######### Helpers #########<br>    allow_all_server_side_workflows = optional(bool, false)<br>    terragrunt_atlantis_config = optional(object({<br>      enabled  = optional(bool, false)<br>      output   = optional(string, "atlantis.yaml")<br>      autoplan = optional(bool, false)<br>      parallel = optional(bool, false)<br>      filter   = optional(string)<br>    }), {})<br>  })</pre> | `{}` | no |
-| <a name="input_use_predefined_workflows"></a> [use\_predefined\_workflows](#input\_use\_predefined\_workflows) | Indicates wherever predefined workflows should be added to the generated repo config file | `bool` | `true` | no |
-| <a name="input_workflows"></a> [workflows](#input\_workflows) | List of custom workflow that will be added to the repo config file | <pre>map(object({<br>    plan = optional(object({<br>      steps = any<br>    }))<br>    apply = optional(object({<br>      steps = any<br>    }))<br>    policy_check = optional(object({<br>      steps = any<br>    }))<br>  }))</pre> | `{}` | no |
+| <a name="input_workflows"></a> [workflows](#input\_workflows) | List of custom workflow that will be added to the repo config file | <pre>map(object({<br>    plan = optional(object({<br>      steps = optional(list(object({<br>        env = optional(object({<br>          name    = string<br>          command = string<br>        }))<br>        run      = optional(string)<br>        multienv = optional(string)<br>        atlantis_step = optional(object({<br>          command    = string<br>          extra_args = optional(list(string))<br>        }))<br>      })))<br>    }))<br>    apply = optional(object({<br>      steps = optional(list(object({<br>        env = optional(object({<br>          name    = string<br>          command = string<br>        }))<br>        run      = optional(string)<br>        multienv = optional(string)<br>        atlantis_step = optional(object({<br>          command    = string<br>          extra_args = optional(list(string))<br>        }))<br>      })))<br>    }))<br>    import = optional(object({<br>      steps = optional(list(object({<br>        env = optional(object({<br>          name    = string<br>          command = string<br>        }))<br>        run      = optional(string)<br>        multienv = optional(string)<br>        atlantis_step = optional(object({<br>          command    = string<br>          extra_args = optional(list(string))<br>        }))<br>      })))<br>    }))<br>    state_rm = optional(object({<br>      steps = optional(list(object({<br>        env = optional(object({<br>          name    = string<br>          command = string<br>        }))<br>        run      = optional(string)<br>        multienv = optional(string)<br>        atlantis_step = optional(object({<br>          command    = string<br>          extra_args = optional(list(string))<br>        }))<br>      })))<br>    }))<br>    template = optional(string, "terragrunt-basic")<br>    asdf = optional(object({<br>      enabled = optional(bool, false)<br>    }), {})<br>    checkov = optional(object({<br>      enabled   = optional(bool, false)<br>      soft_fail = optional(bool, false)<br>      file      = optional(string, "$SHOWFILE")<br>    }), {})<br>    pull_gitlab_variables = optional(object({<br>      enabled = optional(bool, false)<br>    }), {})<br>    check_gitlab_approvals = optional(object({<br>      enabled = optional(bool, false)<br>    }), {}),<br>  }))</pre> | `{}` | no |
 
 ## Modules
 
