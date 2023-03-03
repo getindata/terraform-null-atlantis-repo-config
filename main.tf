@@ -34,7 +34,7 @@ locals {
       }]) } : {},
   )]
 
-  workflows_helper_options = ["asdf", "checkov", "pull_gitlab_variables", "check_gitlab_approvals", "template"]
+  workflows_helper_options = ["asdf", "checkov", "pull_gitlab_variables", "check_gitlab_approvals", "template", "infracost"]
 
   pre_workflows = {
     for workflow_name, workflow in var.workflows : workflow_name => {
@@ -58,6 +58,7 @@ locals {
       asdf                   = workflow.asdf
       checkov                = workflow.checkov
       check_gitlab_approvals = workflow.check_gitlab_approvals
+      infracost              = workflow.infracost
     }
   }
 
@@ -93,7 +94,15 @@ locals {
               ]
             ))
           }
-        ] : []
+        ] : [],
+        workflow.infracost.enabled && stage_name == "plan" ? [
+          { run = "infracost breakdown --path=tgplan.json --format=json --log-level=info --out-file=$INFRACOST_OUTPUT --project-name=$REPO_REL_DIR" },
+          jsondecode(
+          name == "env" ?
+          (object.command != null ? jsonencode({ (object.name) : { command : object.name } }) : jsonencode(object.command)) :
+          jsonencode({ (name) : object })
+          )
+        ] :  []
       ) } if !contains(local.workflows_helper_options, stage_name) && lookup(stage, "steps", null) != null
     }
   }

@@ -129,6 +129,9 @@ variable "workflows" {
       soft_fail = optional(bool, false)
       file      = optional(string, "$SHOWFILE")
     }), {})
+    infracost = optional(object({
+      enabled   = optional(bool, false)
+    }), {})
     pull_gitlab_variables = optional(object({
       enabled = optional(bool, false)
     }), {})

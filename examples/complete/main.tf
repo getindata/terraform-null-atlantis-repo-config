@@ -35,7 +35,8 @@ module "repo_config" {
         steps = [
           { run = "terraform fmt -no-color -check=true -diff=true -write=false" },
           { run = "echo \"Formatting done, start planning...\"" },
-          { atlantis_step = { command = "plan", extra_args = ["-no-color"] } }
+          { atlantis_step = { command = "plan", extra_args = ["-no-color"] } },
+          { env = {name = "INFRACOST_OUTPUT", command = "jakas tam komenda"} }
         ]
       }
       template = "null_workflow"
@@ -43,6 +44,7 @@ module "repo_config" {
 
     terragrunt-basic-with-features = {
       checkov                = { enabled = true, soft_fail = true }
+      infracost              = { enabled = true }
       check_gitlab_approvals = { enabled = true }
       asdf                   = { enabled = true }
     }
@@ -50,6 +52,7 @@ module "repo_config" {
     terragrunt-basic-check-with-features = {
       template              = "terragrunt-basic-check"
       checkov               = { enabled = true }
+      infracost             = { enabled = true }
       pull_gitlab_variables = { enabled = true }
       asdf                  = { enabled = true }
     }
