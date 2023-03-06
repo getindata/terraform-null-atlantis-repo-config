@@ -3,17 +3,9 @@ module "repo_config" {
 
   repos = [
     {
-      id       = "github.com/getindata/foo"
-      workflow = "terraform-basic"
-    },
-    {
-      id                = "github.com/getindata/bar"
-      workflow          = "terraform-basic-with-fmt"
-      allowed_overrides = ["delete_source_branch_on_merge"]
-    },
-    {
-      id                              = "github.com/getindata/baz"
+      id                              = "gitlab.com/getindata/devops/playground/infracost"
       allowed_overrides               = ["workflow", "delete_source_branch_on_merge"]
+      workflow                        = "terragrunt-basic-with-features"
       allow_custom_workflows          = true
       allow_all_server_side_workflows = true
 
@@ -44,6 +36,7 @@ module "repo_config" {
     terragrunt-basic-with-features = {
       checkov                = { enabled = true, soft_fail = true }
       infracost              = { enabled = true }
+      pull_gitlab_variables  = { enabled = true }
       check_gitlab_approvals = { enabled = true }
       asdf                   = { enabled = true }
     }
