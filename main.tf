@@ -31,16 +31,16 @@ locals {
               repo.terragrunt_atlantis_config.use_project_markers != null ? format("--use-project-markers=%s", repo.terragrunt_atlantis_config.use_project_markers) : null,
             ]
           ))
-      }],[{
-        run : "rm -rf /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM"
-      }
-      ],
-      [ {
-        run : "mkdir -p /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM"
-      }
+          }], [{
+          run : "rm -rf /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM"
+        }
+        ],
+        [{
+          run : "mkdir -p /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM"
+          }
       ]) } : {},
       repo.infracost.enabled ? { post_workflow_hooks = concat(lookup(repo, "post_workflow_hooks", []), [
-             { run :"infracost comment gitlab --repo $BASE_REPO_OWNER/$BASE_REPO_NAME --merge-request $PULL_NUM --path /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM/'*'-infracost.json --gitlab-token $GITLAB_TOKEN --behavior new"}]) } : {},
+      { run : "infracost comment gitlab --repo $BASE_REPO_OWNER/$BASE_REPO_NAME --merge-request $PULL_NUM --path /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM/'*'-infracost.json --gitlab-token $GITLAB_TOKEN --behavior new" }]) } : {},
   )]
 
   workflows_helper_options = ["asdf", "checkov", "pull_gitlab_variables", "check_gitlab_approvals", "template", "infracost"]
@@ -104,10 +104,10 @@ locals {
             ))
           }
         ] : [],
-          jsondecode(workflow.infracost.enabled && stage_name == "plan" ? jsonencode([
-            { env = { name= "INFRACOST_OUTPUT", command = "echo /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM/$WORKSPACE-`echo $REPO_REL_DIR | sed 's#/#-#g'`-infracost.json" } },
-            { run = "infracost breakdown --path=$SHOWFILE --format=json --log-level=info --out-file=$INFRACOST_OUTPUT --project-name=$REPO_REL_DIR" }
-          ]) : jsonencode([]))
+        jsondecode(workflow.infracost.enabled && stage_name == "plan" ? jsonencode([
+          { env = { name = "INFRACOST_OUTPUT", command = "echo /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM/$WORKSPACE-`echo $REPO_REL_DIR | sed 's#/#-#g'`-infracost.json" } },
+          { run = "infracost breakdown --path=$SHOWFILE --format=json --log-level=info --out-file=$INFRACOST_OUTPUT --project-name=$REPO_REL_DIR" }
+        ]) : jsonencode([]))
       ) } if !contains(local.workflows_helper_options, stage_name) && lookup(stage, "steps", null) != null
     }
   }

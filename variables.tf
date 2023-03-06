@@ -17,7 +17,7 @@ variable "repos" {
     workflow = optional(string)
     ######### Helpers #########
     infracost = optional(object({
-      enabled              = optional(bool, true)
+      enabled = optional(bool, true)
     }), {})
     allow_all_server_side_workflows = optional(bool, false)
     terragrunt_atlantis_config = optional(object({
@@ -136,7 +136,7 @@ variable "workflows" {
       file      = optional(string, "$SHOWFILE")
     }), {})
     infracost = optional(object({
-      enabled   = optional(bool, false)
+      enabled = optional(bool, false)
     }), {})
     pull_gitlab_variables = optional(object({
       enabled = optional(bool, false)
