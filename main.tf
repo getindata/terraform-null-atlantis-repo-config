@@ -31,7 +31,14 @@ locals {
               repo.terragrunt_atlantis_config.use_project_markers != null ? format("--use-project-markers=%s", repo.terragrunt_atlantis_config.use_project_markers) : null,
             ]
           ))
-      }]) } : {},
+      }],[{
+        run : "rm -rf /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM"
+      }
+      ],
+      [ {
+        run : "mkdir -p /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM"
+      }
+      ]) } : {},
       repo.infracost.enabled ? { post_workflow_hooks = concat(lookup(repo, "post_workflow_hooks", []), [
              { run :"infracost comment gitlab --repo $BASE_REPO_OWNER/$BASE_REPO_NAME --merge-request $PULL_NUM --path /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM/'*'-infracost.json --gitlab-token $GITLAB_TOKEN --behavior new"}]) } : {},
   )]
