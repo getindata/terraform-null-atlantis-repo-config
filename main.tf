@@ -1,6 +1,6 @@
 locals {
   #Repo attributes that are meant to simplify configuration rather than being actual repo options
-  helper_options = ["allow_all_server_side_workflows", "terragrunt_atlantis_config"]
+  helper_options = ["allow_all_server_side_workflows", "terragrunt_atlantis_config", "infracost"]
 
   #Remove all options that are null
   repos_with_non_null_values = [

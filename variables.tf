@@ -51,9 +51,6 @@ variable "repos_common_config" {
       run = string
     })))
     workflow = optional(string)
-/*    infracost = optional(object({
-      enabled              = optional(bool, false)
-    }), {})*/
     ######### Helpers #########
     allow_all_server_side_workflows = optional(bool, false)
     terragrunt_atlantis_config = optional(object({
@@ -62,6 +59,9 @@ variable "repos_common_config" {
       autoplan = optional(bool, false)
       parallel = optional(bool, false)
       filter   = optional(string)
+    }), {})
+    infracost = optional(object({
+      enabled = optional(bool, false)
     }), {})
   })
   default = {}
