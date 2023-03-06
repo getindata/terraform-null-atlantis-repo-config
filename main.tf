@@ -95,14 +95,10 @@ locals {
             ))
           }
         ] : [],
-        workflow.infracost.enabled && stage_name == "plan" ? [
-          { run = "infracost breakdown --path=tgplan.json --format=json --log-level=info --out-file=$INFRACOST_OUTPUT --project-name=$REPO_REL_DIR" },
-          jsondecode(
-          name == "env" ?
-          (object.command != null ? jsonencode({ (object.name) : { command : object.name } }) : jsonencode(object.command)) :
-          jsonencode({ (name) : object })
-          )
-        ] :  []
+          jsondecode(workflow.infracost.enabled && stage_name == "plan" ? jsonencode([
+            { env = { name= "INFRACOST_OUTPUT", command = "echo '/tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM/$WORKSPACE-'${(#)$((0x5c))}"-infracost.json' " } },
+            { run = "infracost breakdown --path=tgplan.json --format=json --log-level=info --out-file=$INFRACOST_OUTPUT --project-name=$REPO_REL_DIR" }
+          ]) : jsonencode([]))
       ) } if !contains(local.workflows_helper_options, stage_name) && lookup(stage, "steps", null) != null
     }
   }
