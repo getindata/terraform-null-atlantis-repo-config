@@ -42,6 +42,7 @@ module "template" {
       }
       
       checkov                = { enabled = true, soft_fail = true }
+      infracost              = { enabled = true }
       check_gitlab_approvals = { enabled = true }
       asdf                   = { enabled = true }
     }
