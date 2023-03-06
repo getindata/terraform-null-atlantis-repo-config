@@ -36,7 +36,6 @@ module "repo_config" {
           { run = "terraform fmt -no-color -check=true -diff=true -write=false" },
           { run = "echo \"Formatting done, start planning...\"" },
           { atlantis_step = { command = "plan", extra_args = ["-no-color"] } },
-          { env = {name = "INFRACOST_OUTPUT", command = "jakas tam komenda"} }
         ]
       }
       template = "null_workflow"
