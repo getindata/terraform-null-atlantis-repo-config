@@ -36,13 +36,10 @@ locals {
         ))
       }
     ] : [],
-    lookup(repo, "workflow", "") != "" && local.pre_workflows[lookup(repo, "workflow", "")].infracost.enabled ? [{
-      run : "rm -rf /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM"
-    }]
-      [{
-      run : "mkdir -p /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM"
-    }
-    ] : [],
+    lookup(repo, "workflow", "") != "" && lookup(local.pre_workflows, lookup(repo, "workflow", ""), "") != "" ? (local.pre_workflows[lookup(repo, "workflow", "")].infracost.enabled ? [
+      { run : "rm -rf /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM" },
+      { run : "mkdir -p /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM" }
+    ] : []) : [],
 
   repo.infracost.enabled ? [{ post_workflow_hooks = concat(lookup(repo, "post_workflow_hooks", []), [
         { run : "infracost comment gitlab --repo $BASE_REPO_OWNER/$BASE_REPO_NAME --merge-request $PULL_NUM --path /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM/'*'-infracost.json --gitlab-token $GITLAB_TOKEN --behavior new" },
