@@ -46,12 +46,12 @@ locals {
     ] : [],
 
 
-  repo.infracost.enabled ? { post_workflow_hooks = concat(lookup(repo, "post_workflow_hooks", []), [
+  repo.infracost.enabled ? [{ post_workflow_hooks = concat(lookup(repo, "post_workflow_hooks", []), [
         { run : "infracost comment gitlab --repo $BASE_REPO_OWNER/$BASE_REPO_NAME --merge-request $PULL_NUM --path /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM/'*'-infracost.json --gitlab-token $GITLAB_TOKEN --behavior new" },
         { run : "rm -rf /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM" },
         { run : "mkdir -p /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM" }
-        ]) } : {}
-  )]
+        ]) }] : []
+  )})]
 
   workflows_helper_options = ["asdf", "checkov", "pull_gitlab_variables", "check_gitlab_approvals", "template", "infracost"]
 
