@@ -16,35 +16,37 @@ locals {
         for k, v in repo : k => v if contains(local.helper_options, k) == false
       },
       repo.allow_all_server_side_workflows ? { allowed_workflows = keys(local.workflows) } : {},
-  {
-    pre_workflow_hooks = concat(
-    lookup(repo, "pre_workflow_hooks", []),
-    repo.terragrunt_atlantis_config.enabled ? [
       {
-        run : join(" ", compact(
-        [
-          "terragrunt-atlantis-config",
-          "generate",
-          format("--output \"%s\"", repo.terragrunt_atlantis_config.output),
-          repo.terragrunt_atlantis_config.filter != null ? format("--filter \"%s\"", repo.terragrunt_atlantis_config.filter) : null,
-          repo.terragrunt_atlantis_config.parallel != null ? format("--parallel=%s", repo.terragrunt_atlantis_config.parallel) : null,
-          repo.terragrunt_atlantis_config.autoplan != null ? format("--autoplan=%s", repo.terragrunt_atlantis_config.autoplan) : null,
-          repo.terragrunt_atlantis_config.automerge != null ? format("--automerge=%s", repo.terragrunt_atlantis_config.automerge) : null,
-          repo.terragrunt_atlantis_config.cascade_dependencies != null ? format("--cascade-dependencies=%s", repo.terragrunt_atlantis_config.cascade_dependencies) : null,
-          repo.terragrunt_atlantis_config.use_project_markers != null ? format("--use-project-markers=%s", repo.terragrunt_atlantis_config.use_project_markers) : null,
-        ]
-        ))
-      }
-    ] : [],
-    lookup(repo, "workflow", "") != "" && lookup(local.pre_workflows, lookup(repo, "workflow", ""), "") != "" ? (local.pre_workflows[lookup(repo, "workflow", "")].infracost.enabled ? [
-      { run : "rm -rf /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM" },
-      { run : "mkdir -p /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM" }
-    ] : []) : [],
-
-  repo.infracost.enabled ? [{ post_workflow_hooks = concat(lookup(repo, "post_workflow_hooks", []), [
-        { run : "infracost comment gitlab --repo $BASE_REPO_OWNER/$BASE_REPO_NAME --merge-request $PULL_NUM --path /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM/'*'-infracost.json --gitlab-token $GITLAB_TOKEN --behavior new" },
-        ]) }] : []
-  )})]
+        pre_workflow_hooks = concat(
+          lookup(repo, "pre_workflow_hooks", []),
+          repo.terragrunt_atlantis_config.enabled ? [
+            {
+              run : join(" ", compact(
+              [
+                "terragrunt-atlantis-config",
+                "generate",
+                format("--output \"%s\"", repo.terragrunt_atlantis_config.output),
+                repo.terragrunt_atlantis_config.filter != null ? format("--filter \"%s\"", repo.terragrunt_atlantis_config.filter) : null,
+                repo.terragrunt_atlantis_config.parallel != null ? format("--parallel=%s", repo.terragrunt_atlantis_config.parallel) : null,
+                repo.terragrunt_atlantis_config.autoplan != null ? format("--autoplan=%s", repo.terragrunt_atlantis_config.autoplan) : null,
+                repo.terragrunt_atlantis_config.automerge != null ? format("--automerge=%s", repo.terragrunt_atlantis_config.automerge) : null,
+                repo.terragrunt_atlantis_config.cascade_dependencies != null ? format("--cascade-dependencies=%s", repo.terragrunt_atlantis_config.cascade_dependencies) : null,
+                repo.terragrunt_atlantis_config.use_project_markers != null ? format("--use-project-markers=%s", repo.terragrunt_atlantis_config.use_project_markers) : null,
+              ]
+              ))
+            }
+          ] : [],
+          lookup(repo, "workflow", "") != "" && lookup(local.pre_workflows, lookup(repo, "workflow", ""), "") != "" ? (
+            local.pre_workflows[lookup(repo, "workflow", "")].infracost.enabled ? [
+              { run : "rm -rf /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM" },
+              { run : "mkdir -p /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM" }
+            ] : []) : []
+          ),
+        post_workflow_hooks = repo.infracost.enabled ? concat(lookup(repo, "post_workflow_hooks", []), [
+          { run : "infracost comment gitlab --repo $BASE_REPO_OWNER/$BASE_REPO_NAME --merge-request $PULL_NUM --path /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM/'*'-infracost.json --gitlab-token $GITLAB_TOKEN --behavior new" },
+        ]) : []
+      })
+  ]
 
   workflows_helper_options = ["asdf", "checkov", "pull_gitlab_variables", "check_gitlab_approvals", "template", "infracost"]
 
