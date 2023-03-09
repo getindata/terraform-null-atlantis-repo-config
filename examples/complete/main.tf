@@ -5,11 +5,6 @@ module "repo_config" {
     {
       id       = "github.com/getindata/foo"
       workflow = "terraform-basic"
-
-      terragrunt_atlantis_config = {
-        enabled  = true
-        autoplan = true
-      }
     },
     {
       id                = "github.com/getindata/bar"
@@ -48,7 +43,6 @@ module "repo_config" {
 
     terragrunt-basic-with-features = {
       checkov                = { enabled = true, soft_fail = true }
-      infracost              = { enabled = true }
       check_gitlab_approvals = { enabled = true }
       asdf                   = { enabled = true }
     }
@@ -56,7 +50,6 @@ module "repo_config" {
     terragrunt-basic-check-with-features = {
       template              = "terragrunt-basic-check"
       checkov               = { enabled = true }
-      infracost             = { enabled = true }
       pull_gitlab_variables = { enabled = true }
       asdf                  = { enabled = true }
     }
