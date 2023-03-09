@@ -4,7 +4,7 @@ module "repo_config" {
   repos = [
     {
       id       = "github.com/getindata/foo"
-      workflow = "terragrunt-basic-with-features"
+      workflow = "terraform-basic"
 
       terragrunt_atlantis_config = {
         enabled  = true
