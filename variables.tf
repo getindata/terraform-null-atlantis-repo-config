@@ -13,12 +13,9 @@ variable "repos" {
     })))
     post_workflow_hooks = optional(list(object({
       run = string
-    })))
+    })))xs
     workflow = optional(string)
     ######### Helpers #########
-    infracost = optional(object({
-      enabled = optional(bool, true)
-    }), {})
     allow_all_server_side_workflows = optional(bool, false)
     terragrunt_atlantis_config = optional(object({
       enabled              = optional(bool, false)
