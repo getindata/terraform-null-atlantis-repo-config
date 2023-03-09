@@ -4,7 +4,12 @@ module "repo_config" {
   repos = [
     {
       id       = "github.com/getindata/foo"
-      workflow = "terraform-basic"
+      workflow = "terragrunt-basic-with-features"
+
+      terragrunt_atlantis_config = {
+        enabled  = true
+        autoplan = true
+      }
     },
     {
       id                = "github.com/getindata/bar"
