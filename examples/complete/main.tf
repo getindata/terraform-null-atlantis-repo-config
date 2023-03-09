@@ -58,3 +58,4 @@ module "repo_config" {
   repo_config_file = {
     enabled = true
   }
+}
