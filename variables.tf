@@ -5,7 +5,7 @@ variable "repos" {
     branch                        = optional(string)
     apply_requirements            = optional(list(string))
     allowed_overrides             = optional(list(string))
-    allowed_workflows             = optional(list(string))
+    allowed_workflows             = optional(list(string), [])
     allow_custom_workflows        = optional(bool)
     delete_source_branch_on_merge = optional(bool)
     pre_workflow_hooks = optional(list(object({
@@ -18,8 +18,8 @@ variable "repos" {
     ######### Helpers #########
     allow_all_server_side_workflows = optional(bool, false)
     terragrunt_atlantis_config = optional(object({
-      enabled              = optional(bool, false)
-      output               = optional(string, "atlantis.yaml")
+      enabled              = optional(bool)
+      output               = optional(string)
       automerge            = optional(bool)
       autoplan             = optional(bool)
       parallel             = optional(bool)
@@ -51,11 +51,17 @@ variable "repos_common_config" {
     ######### Helpers #########
     allow_all_server_side_workflows = optional(bool, false)
     terragrunt_atlantis_config = optional(object({
-      enabled  = optional(bool, false)
-      output   = optional(string, "atlantis.yaml")
-      autoplan = optional(bool, false)
-      parallel = optional(bool, false)
-      filter   = optional(string)
+      enabled              = optional(bool, false)
+      output               = optional(string, "atlantis.yaml")
+      automerge            = optional(bool)
+      autoplan             = optional(bool)
+      parallel             = optional(bool)
+      cascade_dependencies = optional(bool)
+      filter               = optional(string)
+      use_project_markers  = optional(bool)
+    }), {})
+    infracost = optional(object({
+      enabled = optional(bool, false)
     }), {})
   })
   default = {}
@@ -129,6 +135,9 @@ variable "workflows" {
       soft_fail = optional(bool, false)
       file      = optional(string, "$SHOWFILE")
     }), {})
+    infracost = optional(object({
+      enabled = optional(bool, false)
+    }), {})
     pull_gitlab_variables = optional(object({
       enabled = optional(bool, false)
     }), {})
@@ -149,7 +158,7 @@ variable "workflows" {
           ]) == 1)
         ]
         if !contains([
-          "asdf", "checkov", "pull_gitlab_variables", "check_gitlab_approvals", "template"
+          "asdf", "checkov", "infracost", "pull_gitlab_variables", "check_gitlab_approvals", "template"
         ], stage_name) && stage != null
       ]
     ]))
