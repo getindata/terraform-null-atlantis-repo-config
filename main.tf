@@ -58,6 +58,7 @@ locals {
 
   workflows_helper_options = ["asdf", "checkov", "pull_gitlab_variables", "check_gitlab_approvals", "template", "infracost"]
 
+  # tflint-ignore: terraform_naming_convention
   _workflows = {
     for workflow_name, workflow in var.workflows : workflow_name => {
       plan = merge(
