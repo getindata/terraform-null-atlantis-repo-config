@@ -26,7 +26,7 @@ variable "repos" {
       cascade_dependencies = optional(bool)
       filter               = optional(string)
       use_project_markers  = optional(bool)
-    }))
+    }), {})
   }))
   default = []
 }

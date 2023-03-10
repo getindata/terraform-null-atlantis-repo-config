@@ -1,12 +1,16 @@
 locals {
   #Repo attributes that are meant to simplify configuration rather than being actual repo options
-  helper_options = ["allow_all_server_side_workflows", "terragrunt_atlantis_config", "infracost"]
+  helper_options = ["allow_all_server_side_workflows", "terragrunt_atlantis_config"]
 
   #Remove all options that are null
   repos_with_non_null_values = [
     for repo in var.repos : merge(
       { for k, v in var.repos_common_config : k => v if v != null },
-      { for k, v in repo : k => v if v != null }
+      { for k, v in repo : k => v if v != null },
+      { terragrunt_atlantis_config : merge(
+        var.repos_common_config.terragrunt_atlantis_config,
+        { for k, v in repo.terragrunt_atlantis_config : k => v if v != null }
+      ) }
     )
   ]
   #Apply helper variables and then remove them
@@ -36,21 +40,25 @@ locals {
               ))
             }
           ] : [],
-          lookup(repo, "workflow", "") != "" && lookup(local.pre_workflows, lookup(repo, "workflow", ""), "") != "" ? (
-            local.pre_workflows[lookup(repo, "workflow", "")].infracost.enabled ? [
+          lookup(repo, "workflow", "") != "" && lookup(local._workflows, lookup(repo, "workflow", ""), "") != "" ? (
+            local._workflows[lookup(repo, "workflow", "")].infracost.enabled ? [
               { run : "rm -rf /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM" },
               { run : "mkdir -p /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM" }
           ] : []) : []
         ),
-        post_workflow_hooks = repo.infracost.enabled ? concat(lookup(repo, "post_workflow_hooks", []), [
-          { run : "infracost comment gitlab --repo $BASE_REPO_OWNER/$BASE_REPO_NAME --merge-request $PULL_NUM --path /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM/'*'-infracost.json --gitlab-token $GITLAB_TOKEN --behavior new" },
-        ]) : []
+        post_workflow_hooks = concat(
+          lookup(repo, "post_workflow_hooks", []),
+          lookup(repo, "workflow", "") != "" && lookup(local._workflows, lookup(repo, "workflow", ""), "") != "" ? (
+            local._workflows[lookup(repo, "workflow", "")].infracost.enabled ? [
+              { run : "infracost comment gitlab --repo $BASE_REPO_OWNER/$BASE_REPO_NAME --merge-request $PULL_NUM --path /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM/'*'-infracost.json --gitlab-token $GITLAB_TOKEN --behavior new" }
+          ] : []) : []
+        )
     })
   ]
 
   workflows_helper_options = ["asdf", "checkov", "pull_gitlab_variables", "check_gitlab_approvals", "template", "infracost"]
 
-  pre_workflows = {
+  _workflows = {
     for workflow_name, workflow in var.workflows : workflow_name => {
       plan = merge(
         local.null_workflow.plan,
@@ -81,7 +89,7 @@ locals {
   check_gitlab_approvals_steps = [{ run = "check-gitlab-approvals.sh" }]
 
   workflows = {
-    for workflow_name, workflow in local.pre_workflows : workflow_name => {
+    for workflow_name, workflow in local._workflows : workflow_name => {
       for stage_name, stage in workflow : stage_name => { steps : concat(
         workflow.asdf.enabled && stage_name == "plan" ? local.asdf_steps : [],
         workflow.pull_gitlab_variables.enabled ? local.pull_gitlab_variables_steps : [],

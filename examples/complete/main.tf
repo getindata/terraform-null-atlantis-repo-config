@@ -19,7 +19,8 @@ module "repo_config" {
 
       terragrunt_atlantis_config = {
         enabled  = true
-        autoplan = true
+        parallel = false
+        autoplan = false
       }
     }
   ]
@@ -27,6 +28,11 @@ module "repo_config" {
   repos_common_config = {
     apply_requirements = ["approved", "mergeable"]
     branch             = "/main/"
+
+    terragrunt_atlantis_config = {
+      enabled  = true
+      autoplan = true
+    }
   }
 
   workflows = {
