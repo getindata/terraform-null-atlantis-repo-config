@@ -1,6 +1,6 @@
 locals {
   #Repo attributes that are meant to simplify configuration rather than being actual repo options
-  helper_options = ["allow_all_server_side_workflows", "terragrunt_atlantis_config"]
+  helper_options = ["allow_all_server_side_workflows", "terragrunt_atlantis_config", "infracost"]
 
   #Remove all options that are null
   repos_with_non_null_values = [
@@ -50,7 +50,20 @@ locals {
           lookup(repo, "post_workflow_hooks", []),
           lookup(repo, "workflow", "") != "" && lookup(local._workflows, lookup(repo, "workflow", ""), "") != "" ? (
             local._workflows[lookup(repo, "workflow", "")].infracost.enabled ? [
-              { run : "infracost comment gitlab --repo $BASE_REPO_OWNER/$BASE_REPO_NAME --merge-request $PULL_NUM --path /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM/'*'-infracost.json --gitlab-token $GITLAB_TOKEN --behavior new" }
+              { run : <<EOT
+if [ ! -d "/tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM" ]; then
+  exit 0
+fi
+
+infracost comment gitlab --repo $BASE_REPO_OWNER/$BASE_REPO_NAME \
+                         --merge-request $PULL_NUM \
+                         --path /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM/'*'-infracost.json \
+                         --gitlab-token $GITLAB_TOKEN \
+                         --behavior new
+
+rm -rf /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM
+EOT
+              }
           ] : []) : []
         )
     })
