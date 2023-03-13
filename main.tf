@@ -51,17 +51,18 @@ locals {
           lookup(repo, "workflow", "") != "" && lookup(local._workflows, lookup(repo, "workflow", ""), "") != "" ? (
             local._workflows[lookup(repo, "workflow", "")].infracost.enabled ? [
               { run : <<EOT
-if [ ! -d "/tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM" ]; then
+JSON_DIRECTORY=/tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM
+if [[ ! -d "$JSON_DIRECTORY" || -z "$(ls -A $JSON_DIRECTORY)" ]]; then
   exit 0
 fi
 
 infracost comment gitlab --repo $BASE_REPO_OWNER/$BASE_REPO_NAME \
                          --merge-request $PULL_NUM \
-                         --path /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM/'*'-infracost.json \
+                         --path $JSON_DIRECTORY/'*'-infracost.json \
                          --gitlab-token $GITLAB_TOKEN \
                          --behavior new
 
-rm -rf /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM
+rm -rf $JSON_DIRECTORY
 EOT
               }
           ] : []) : []
