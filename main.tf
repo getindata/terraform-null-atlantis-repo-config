@@ -51,7 +51,7 @@ locals {
           lookup(repo, "workflow", "") != "" && lookup(local._workflows, lookup(repo, "workflow", ""), "") != "" ? (
             local._workflows[lookup(repo, "workflow", "")].infracost.enabled ? [
               { run : <<EOT
-if [ -f "/tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM/sent" ]; then
+if [ ! -d "/tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM" ]; then
   exit 0
 fi
 
@@ -61,7 +61,7 @@ infracost comment gitlab --repo $BASE_REPO_OWNER/$BASE_REPO_NAME \
                          --gitlab-token $GITLAB_TOKEN \
                          --behavior new
 
-touch /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM/sent
+rm -rf /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM
 EOT
               }
           ] : []) : []
