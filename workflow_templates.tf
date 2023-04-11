@@ -20,14 +20,14 @@ locals {
     terragrunt-basic = merge(local.null_workflow, {
       plan = {
         steps = [
-          { run = "terragrunt fmt -no-color -check=true -diff=true -write=false" },
-          { run = "terragrunt hclfmt --terragrunt-check" },
-          { run = "terragrunt plan -no-color -out $PLANFILE" }
+          { run = "terragrunt fmt -no-color -check=true -diff=true -write=false --terragrunt-non-interactive" },
+          { run = "terragrunt hclfmt --terragrunt-check --terragrunt-non-interactive" },
+          { run = "terragrunt plan -no-color -out $PLANFILE --terragrunt-non-interactive" }
         ]
       }
       apply = {
         steps = [
-          { run = "terragrunt apply -no-color -input=false -compact-warnings -auto-approve $PLANFILE" }
+          { run = "terragrunt apply -no-color -input=false -compact-warnings -auto-approve $PLANFILE --terragrunt-non-interactive" }
         ]
       }
     })
@@ -35,8 +35,8 @@ locals {
     terragrunt-basic-check = merge(local.null_workflow, {
       plan = {
         steps = [
-          { run = "terragrunt fmt -no-color -check=true -diff=true -write=false" },
-          { run = "terragrunt hclfmt --terragrunt-check" },
+          { run = "terragrunt fmt -no-color -check=true -diff=true -write=false --terragrunt-non-interactive" },
+          { run = "terragrunt hclfmt --terragrunt-check --terragrunt-non-interactive" },
           # Create fake terraform-plan...
           { run = "terragrunt show -json > $PLANFILE" }
         ]
