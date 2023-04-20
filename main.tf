@@ -3,9 +3,9 @@ locals {
   helper_options = ["allow_all_server_side_workflows", "terragrunt_atlantis_config", "infracost"]
 
   infracost_parameters = {
-    github : { token_name : "github-token", environment_variable_name : "GITHUB_TOKEN" },
-    gitlab : { token_name : "gitlab-token", environment_variable_name : "GITLAB_TOKEN" },
-    bitbucket : { token_name : "bitbucket-token", environment_variable_name : "BITBUCKET_TOKEN" }
+    github : { token_name : "gh-token", environment_variable_name : "ATLANTIS_GH_TOKEN" },
+    gitlab : { token_name : "gitlab-token", environment_variable_name : "ATLANTIS_GITLAB_TOKEN" },
+    bitbucket : { token_name : "bitbucket-token", environment_variable_name : "ATLANTIS_BITBUCKET_TOKEN" }
   }
 
   #Remove all options that are null
