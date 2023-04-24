@@ -138,6 +138,7 @@ variable "workflows" {
     infracost = optional(object({
       enabled  = optional(bool, false)
       platform = optional(string, "gitlab")
+      token    = optional(string, "")
     }), {})
     pull_gitlab_variables = optional(object({
       enabled = optional(bool, false)

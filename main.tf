@@ -60,13 +60,14 @@ locals {
                 "if [ ! -d \"/tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM\" ]; then exit 0; fi",
                 "\n\n",
                 join(" ", [
+                  format("%s=%s", "DEFAULT_TOKEN", local._workflows[repo.workflow].infracost.token),
                   "infracost",
                   "comment",
                   local._workflows[lookup(repo, "workflow", "")].infracost.platform,
                   "--repo $BASE_REPO_OWNER/$BASE_REPO_NAME",
                   "--merge-request $PULL_NUM",
                   "--path /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM/'*'-infracost.json",
-                  format("--%s $%s",
+                  format("--%s $${DEFAULT_TOKEN:-$%s}",
                     local.infracost_parameters[local._workflows[repo.workflow].infracost.platform].token_name,
                     local.infracost_parameters[local._workflows[repo.workflow].infracost.platform].environment_variable_name
                   ),
