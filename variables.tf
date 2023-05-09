@@ -136,9 +136,9 @@ variable "workflows" {
       file      = optional(string, "$SHOWFILE")
     }), {})
     infracost = optional(object({
-      enabled  = optional(bool, false)
-      platform = optional(string, "gitlab")
-      token    = optional(string, "")
+      enabled                    = optional(bool, false)
+      platform                   = optional(string, "gitlab")
+      token_environment_variable = optional(string)
     }), {})
     pull_gitlab_variables = optional(object({
       enabled = optional(bool, false)

@@ -7,7 +7,6 @@ locals {
     gitlab : { token_name : "gitlab-token", environment_variable_name : "ATLANTIS_GITLAB_TOKEN" },
     bitbucket : { token_name : "bitbucket-token", environment_variable_name : "ATLANTIS_BITBUCKET_TOKEN" }
   }
-  default_infracost_token_variable = "DEFAULT_INFRACOST_TOKEN"
 
   #Remove all options that are null
   repos_with_non_null_values = [
@@ -61,17 +60,17 @@ locals {
                 "if [ ! -d \"/tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM\" ]; then exit 0; fi",
                 "\n\n",
                 join(" ", [
-                  format("%s=%s;", local.default_infracost_token_variable, local._workflows[repo.workflow].infracost.token),
                   "infracost",
                   "comment",
                   local._workflows[lookup(repo, "workflow", "")].infracost.platform,
                   "--repo $BASE_REPO_OWNER/$BASE_REPO_NAME",
                   "--merge-request $PULL_NUM",
                   "--path /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM/'*'-infracost.json",
-                  format("--%s $${%s:-$%s}",
+                  format("--%s $%s",
                     local.infracost_parameters[local._workflows[repo.workflow].infracost.platform].token_name,
-                    local.default_infracost_token_variable,
-                    local.infracost_parameters[local._workflows[repo.workflow].infracost.platform].environment_variable_name
+                    coalesce(
+                      local._workflows[repo.workflow].infracost.token_environment_variable,
+                      local.infracost_parameters[local._workflows[repo.workflow].infracost.platform].environment_variable_name)
                   ),
                   "--behavior new",
                 ]),
