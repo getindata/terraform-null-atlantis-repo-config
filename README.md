@@ -49,6 +49,24 @@ module "template" {
   }
 }
 ```
+
+### Infracost configuration
+
+Every workflow can have separately configurable Infracost post workflow hook. As you can see in the example above
+to enable it you need to set `enabled` parameter to true.  
+Other parameters are:
+* `platform` - used to configure which platform Infracost should interact with.
+   Currently supported are: GitHub, GitLab and Bitbucket.  
+* `token_environment_variable` - used to specifying a custom environment variable with an access token
+   to use to authorize when posting comments
+* `behavior` - used to configuring how comments are posted. Possible values: update, hide-and-new, delete-and-new and new. 
+   For more details see: https://www.infracost.io/docs/features/cli_commands/
+
+#### Autoconfiguration based on platform
+
+If you don't specify `token_environment_variable` then an environment variable with an access token will be chosen
+automatically based on specified platform, e.g. on GitLab it will be `ATLANTIS_GITLAB_TOKEN`.
+
 ## EXAMPLES
 
 - [Complete example](examples/complete)

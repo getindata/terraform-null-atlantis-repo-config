@@ -72,7 +72,7 @@ locals {
                       local._workflows[repo.workflow].infracost.token_environment_variable,
                       local.infracost_parameters[local._workflows[repo.workflow].infracost.platform].environment_variable_name)
                   ),
-                  "--behavior new",
+                  format("--behavior %s", local._workflows[lookup(repo, "workflow", "")].infracost.behavior)
                 ]),
                 "\n\n",
                 "rm -rf /tmp/$BASE_REPO_OWNER-$BASE_REPO_NAME-$PULL_NUM"
