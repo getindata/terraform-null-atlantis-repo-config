@@ -136,7 +136,10 @@ variable "workflows" {
       file      = optional(string, "$SHOWFILE")
     }), {})
     infracost = optional(object({
-      enabled = optional(bool, false)
+      enabled                    = optional(bool, false)
+      platform                   = optional(string, "gitlab")
+      token_environment_variable = optional(string)
+      behavior                   = optional(string, "new")
     }), {})
     pull_gitlab_variables = optional(object({
       enabled = optional(bool, false)
@@ -179,6 +182,16 @@ variable "workflows" {
       ]
     ]))
     error_message = "Invalid command in `atlantis_step`. Allowed values: init, plan, show, policy_check, apply, version, import, state_rm"
+  }
+
+  validation {
+    condition     = alltrue([for workflow_name, workflow in var.workflows : contains(["github", "gitlab", "bitbucket"], workflow.infracost.platform)])
+    error_message = "Invalid platform in `infracost`. Allowed values: github, gitlab, bitbucket"
+  }
+
+  validation {
+    condition     = alltrue([for workflow_name, workflow in var.workflows : contains(["update", "hide-and-new", "delete-and-new", "new"], workflow.infracost.behavior)])
+    error_message = "Invalid behavior in `infracost`. Allowed values: update, hide-and-new, delete-and-new, new"
   }
 }
 
