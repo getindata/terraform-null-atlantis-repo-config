@@ -190,7 +190,7 @@ variable "workflows" {
   }
 
   validation {
-    condition = alltrue([for workflow_name, workflow in var.workflows : contains(["update", "hide-and-new", "delete-and-new", "new"], workflow.infracost.behavior)])
+    condition     = alltrue([for workflow_name, workflow in var.workflows : contains(["update", "hide-and-new", "delete-and-new", "new"], workflow.infracost.behavior)])
     error_message = "Invalid behavior in `infracost`. Allowed values: update, hide-and-new, delete-and-new, new"
   }
 }

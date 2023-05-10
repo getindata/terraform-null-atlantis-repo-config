@@ -70,7 +70,7 @@ locals {
                     local.infracost_parameters[local._workflows[repo.workflow].infracost.platform].token_name,
                     coalesce(
                       local._workflows[repo.workflow].infracost.token_environment_variable,
-                      local.infracost_parameters[local._workflows[repo.workflow].infracost.platform].environment_variable_name)
+                    local.infracost_parameters[local._workflows[repo.workflow].infracost.platform].environment_variable_name)
                   ),
                   format("--behavior %s", local._workflows[lookup(repo, "workflow", "")].infracost.behavior)
                 ]),
