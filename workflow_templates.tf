@@ -30,6 +30,18 @@ locals {
           { run = "terragrunt apply --terragrunt-non-interactive -no-color -input=false -compact-warnings -auto-approve $PLANFILE " }
         ]
       }
+      import = {
+        steps = [
+          { env = { name = "IMPORT_ARGS", command = "printf \"%s\" $COMMENT_ARGS | sed \"s/,/ /\" | tr -d \"\\\\\"" } },
+          { run = "terragrunt import --terragrunt-non-interactive -no-color -input=false -compact-warnings $IMPORT_ARGS" }
+        ]
+      }
+      state_rm = {
+        steps = [
+          { env = { name = "STATE_RM_ARGS", command = "printf \"%s\" $COMMENT_ARGS | sed \"s/,/ /\" | tr -d \"\\\\\"" } },
+          { run = "terragrunt state rm --terragrunt-non-interactive -no-color $STATE_RM_ARGS" }
+        ]
+      }
     })
 
     terragrunt-basic-check = merge(local.null_workflow, {
