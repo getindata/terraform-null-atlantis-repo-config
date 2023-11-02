@@ -21,6 +21,11 @@ locals {
     null_workflow = local.null_workflow
 
     terragrunt-basic = merge(local.null_workflow, {
+      init = {
+        steps = [
+           { run = "terragrunt init" }
+        ]
+      }
       plan = {
         steps = [
           { run = "terragrunt fmt --terragrunt-non-interactive -no-color -check=true -diff=true -write=false" },
@@ -48,6 +53,11 @@ locals {
     })
 
     terragrunt-basic-check = merge(local.null_workflow, {
+      init = {
+        steps = [
+          { run = "terragrunt init" }
+        ]
+      }
       plan = {
         steps = [
           { run = "terragrunt fmt --terragrunt-non-interactive -no-color -check=true -diff=true -write=false" },
