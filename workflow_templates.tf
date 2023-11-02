@@ -23,7 +23,7 @@ locals {
     terragrunt-basic = merge(local.null_workflow, {
       init = {
         steps = [
-           { run = "terragrunt init" }
+          { run = "terragrunt init" }
         ]
       }
       plan = {
