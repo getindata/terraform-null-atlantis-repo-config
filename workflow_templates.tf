@@ -1,5 +1,8 @@
 locals {
   null_workflow = {
+    init = {
+      steps = null
+    }
     plan = {
       steps = null
     }
